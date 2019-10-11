@@ -1,0 +1,50 @@
+<?php
+require_once $_SERVER['DOCUMENT_ROOT'].'/web projet/scripts/init.php';
+
+class ManageForum{
+    private static $_instance = null ;
+    public $link ;
+
+    private function __construct(){
+        $this->link = DB::getInstance();
+    }
+
+    public static function getInstance(){
+        if (!isset(self::$_instance)){
+            self::$_instance = new ManageForum();
+        }
+        return self::$_instance;
+    }
+
+    public function getQuestions($where){
+        $result = $this->link->get('forum', $where);
+        return $result;
+    }
+
+    public function getAnswers($where){
+        $result = $this->link->get('Reponse', $where);
+        return $result;
+    }
+
+    public function forumAdding($table, $fields = array()){
+        return $this->link->insert($table, $fields);
+    }
+
+    public function answerEditing($id, $fields = array()){
+        return $this->link->update('reponse', 'IdReponse', $id, $fields);
+    }
+
+    public function forumRating($table, $field_name, $field_value, $fields = array()){
+        return $this->link->update($table, $field_name, $field_value, $fields);
+    }
+
+    public function forumRemoving($table ,$where){
+        return $this->link->delete($table, $where);
+    }
+
+    public function getRate($table, $id_name, $id_value){
+        $positif_rate = $this->link->get($table, array(array($id_name, '=', $id_value), array('etat', '=', 'p')))->count();
+        $negatif_rate = $this->link->get($table, array(array($id_name, '=', $id_value), array('etat', '=', 'm')))->count();
+        return $positif_rate - $negatif_rate;
+    }
+}
